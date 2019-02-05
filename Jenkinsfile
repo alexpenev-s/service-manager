@@ -1,19 +1,27 @@
 pipeline {
-    agent {
-        def label = "mypod-${UUID.randomUUID().toString()}"
-        podTemplate(label: label) {
-            node(label) {
-                stage('Run shell') {
-                    sh 'echo hello world'
-                }
-            }
-        }
+  agent {
+    kubernetes {
+      //cloud 'kubernetes'
+      label 'mypod'
+      yaml """
+apiVersion: v1
+kind: Pod
+spec:
+  containers:
+  - name: maven
+    image: maven:3.3.9-jdk-8-alpine
+    command: ['cat']
+    tty: true
+"""
     }
-    stages {
-        stage('build') {
-            steps {
-                sh 'npm --version'
-            }
+  }
+  stages {
+    stage('Run maven') {
+      steps {
+        container('maven') {
+          sh 'mvn -version'
         }
+      }
     }
+  }
 }
