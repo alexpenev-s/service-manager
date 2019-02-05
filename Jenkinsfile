@@ -1,10 +1,13 @@
 pipeline {
-    def label = "pod-${UUID.randomUUID().toString()}"
-    podTemplate(label: label) {
-        node(label) {
-            stage('Run shell') {
-                sh 'echo hello world'
-            }
+    agent {
+        kubernetes {
+            label 'mypod'
+            containerTemplate {
+                    name 'maven'
+                    image 'maven:3.3.9-jdk-8-alpine'
+                    ttyEnabled true
+                    command 'cat'
+                  }            
         }
     }
     stages {
